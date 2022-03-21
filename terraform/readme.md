@@ -7,10 +7,12 @@ Tool Chain:
 3. Azure Subscription
 4. Azure CLI
 5. GIT
+6. Azure devOps
+7. Docker hub access
 
 ## Azure CLI
 
-``` Text
+```Text
 
 Download the Azure CLI and Install
 You can get the Azure CLI on [docs.microsoft.com](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli) <br/>
@@ -20,7 +22,7 @@ We'll need the Azure CLI to gather information so we can build our Terraform fil
 
 ## Login to Azure and follow prompts
 
-``` TEXT
+````TEXT
 az login
 TENTANT_ID=**"your-tenant-id"**
 ``` TEXT
@@ -32,11 +34,11 @@ TENTANT_ID=**"your-tenant-id"**
 az account list -o table SUBSCRIPTION=**"ID"**
 az account set --subscription $SUBSCRIPTION
 
-```
+````
 
 ## _Create Service Principal_
 
-``` TEXT
+```TEXT
 Kubernetes needs a service account to manage our Kubernetes cluster </br>
 Lets create one! </br>
 
@@ -46,7 +48,7 @@ $SERVICE_PRINCIPAL_JSON=$(az ad sp create-for-rbac --skip-assignment --name aks-
 
 **_Keep the `appId` and `password` for later use_**
 
-``` TEXT
+```TEXT
 
 $SERVICE_PRINCIPAL=$(echo $SERVICE_PRINCIPAL_JSON | jq -r '.appId')
 $SERVICE_PRINCIPAL_SECRET=$(echo $SERVICE_PRINCIPAL_JSON | jq -r '.password')
@@ -59,7 +61,7 @@ az ad sp credential reset --name "aks-getting-started-sp"
 
 ## Grant contributor role over the subscription to our service principal
 
-``` TEXT
+```TEXT
 
 az role assignment create --assignee $SERVICE_PRINCIPAL \
 --scope "/subscriptions/$SUBSCRIPTION" \
@@ -70,7 +72,7 @@ For extra reference you can also take a look at the Microsoft Docs: [here](https
 
 ## Terraform CLI
 
-``` TEXT
+````TEXT
 
 # Get Terraform and Install or Extract
 ``` TEXT
@@ -79,11 +81,11 @@ Download terraForm click [here]<https://releases.hashicorp.com/terraform/1.0.11/
 
 open commnad prompt or powershell and navigate to folder where terrafomr has been extracted
 
-```
+````
 
 ## Generate SSH key
 
-``` TEXT
+```TEXT
 
 ssh-keygen -t rsa -b 4096 -N "VeryStrongSecret123!" -C "your_email@example.com" -q -f  C:\Users\sp_admin\.ssh\id_rsa
 SSH_KEY=$(cat ~/.ssh/id_rsa.pub)
@@ -153,7 +155,7 @@ terraform destroy -var serviceprinciple_id=$SERVICE_PRINCIPAL \
 
 There is no Dockerfile in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:
 
-``` TEXT
+```TEXT
 
 docker-compose -f "docker-compose.yml" up -d --build
 docker push <myregistry>
@@ -164,7 +166,7 @@ After building the conatiner we will push the image to docker hub.
 
 ## Update Code
 
-``` TEXT
+```TEXT
 
 kubectl apply -f '<Deployment Path of YAML File >'
 
@@ -173,6 +175,26 @@ e.g.
 kubectl create -f deployment.yaml
 
 ```
+
+## Azure DevOps Integrations
+
+### CI build pipeline
+
+1.  In your Azure DevOps project, navigate to Pipelines → Pipelines.
+2.  Create a new Build Pipeline.
+3.  Add Copy files and publishartifacts tasks.
+4.  Save and run the pipeline to build .
+
+### CD Pipeline
+
+1. In your Azure DevOps project, navigate to Pipelines → Releases.
+2. Create a new CD Pipeline .
+3. Add _Terraform tool installer task_.
+4. Add _Terraform : init task_,This task invokes the terraform init command that initializes a working directory with the configuration files.
+5. Select the _\*Terraform : plan task._\* This task invokes the terraform plan command, which creates a plan to alter the state of your resources to match your desired infrastructure.
+6. Select the _*Terraform: apply task*_. This task invokes terraform apply command, which executes the plan created in the Terraform: plan task.
+
+Please refer all the screenshots.
 
 ## More resources
 

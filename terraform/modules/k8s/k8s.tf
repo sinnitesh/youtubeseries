@@ -1,8 +1,3 @@
-# data "azurerm_kubernetes_cluster" "aks-getting-started" {
-#   name                = "aks-getting-started"
-#   resource_group_name = "aks-getting-started"
-# }
-
 provider "kubernetes" {
     host                   =  var.host
     client_certificate     =  var.client_certificate
@@ -10,12 +5,6 @@ provider "kubernetes" {
     cluster_ca_certificate =  var.cluster_ca_certificate
 }
 
-# provider "kubernetes" {
-#    host                   = "${data.azurerm_kubernetes_cluster.aks-getting-started.kube_config.0.host}"
-#   client_certificate     = "${base64decode(data.azurerm_kubernetes_cluster.aks-getting-started.kube_config.0.client_certificate)}"
-#   client_key             = "${base64decode(data.azurerm_kubernetes_cluster.aks-getting-started.kube_config.0.client_key)}"
-#   cluster_ca_certificate = "${base64decode(data.azurerm_kubernetes_cluster.aks-getting-started.kube_config.0.cluster_ca_certificate)}"
-# }
 
 
 resource "kubernetes_deployment" "example" {
@@ -44,7 +33,7 @@ resource "kubernetes_deployment" "example" {
 
       spec {
         container {
-          image = "nginx:1.7.8"
+          image = "naveen4557/energybox:0.0.10"
           name  = "example"
 
           resources {
