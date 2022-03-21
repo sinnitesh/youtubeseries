@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  
+  generation: 1
+  labels:
+    test: MyExampleApp
+  name: terraform-example
+  namespace: default
+
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      test: MyExampleApp
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:     
+      labels:
+        test: MyExampleApp
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - image: naveen4557/energybox:0.0.10
+        imagePullPolicy: Always
+        name: example
+        ports:
+         - containerPort: 8080
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 50Mi
+        terminationMessagePath: /dev/termination-log     
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 30
+status:
+  conditions:
+  - lastTransitionTime: "2022-03-12T16:21:25Z"
+    lastUpdateTime: "2022-03-12T16:21:25Z"
+    message: Deployment does not have minimum availability.
+    reason: MinimumReplicasUnavailable
+    status: "False"
+    type: Available
+  - lastTransitionTime: "2022-03-12T16:31:26Z"
+    lastUpdateTime: "2022-03-12T16:31:26Z"
+    message: ReplicaSet "terraform-example-794b48f997" has timed out progressing.
+    reason: ProgressDeadlineExceeded
+    status: "False"
+    type: Progressing
+  observedGeneration: 1
+  replicas: 3
+  unavailableReplicas: 3
+  updatedReplicas: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myexampleapp-service
+  labels:
+    app: myexampleapp-service
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  selector:
+    test: MyExampleApp
